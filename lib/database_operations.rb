@@ -47,8 +47,8 @@ class DatabaseOperations
     }
   end
 
-  def self.load_views_and_triggers!
-    cfg = ActiveRecord::Base.configurations[Rails.env]
+  def self.load_views_and_triggers!(env=Rails.env)
+    cfg = ActiveRecord::Base.configurations[env]
     unless pg(cfg, "createlang -l") =~ /plpgsql/
       pg(cfg, "createlang plpgsql")
     end

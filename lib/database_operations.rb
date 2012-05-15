@@ -35,7 +35,8 @@ class DatabaseOperations
 
     File.open(Rails.root.join(file), "w") { |f|
       f.puts "begin;"
-      f.write pg(cfg, %{pg_dump -s}, :pipe => %{perl -ne 'print unless /COPY.*spatial_ref_sys/ .. /\\x5c\\x2e/'})
+      # Dump database but exclude PostGIS artifacts which are created with CREATE EXTENSION:
+      f.write pg(cfg, %{pg_dump -s -T geometry_columns}, :pipe => %{perl -ne 'print unless /COPY.*spatial_ref_sys/ .. /\\x5c\\x2e/'})
       f.write pg(cfg, %{pg_dump -a -t schema_migrations})
       f.puts "commit;"
     }

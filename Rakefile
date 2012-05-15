@@ -14,10 +14,10 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "better_newrelic_sql_obfuscator"
-  gem.homepage = "http://github.com/projectdx/better_newrelic_sql_obfuscator"
+  gem.name = "database_operations"
+  gem.homepage = "http://github.com/projectdx/database_operations"
   gem.license = "MIT"
-  gem.summary = %Q{Obfuscate SQL in NewRelic in a way that doesn't suck}
+  gem.summary = %Q{Operate the database}
   gem.description = %Q{see Summary}
   gem.email = "devteam@renewfund.com"
   gem.authors = ["Renewable Funding, LLC"]

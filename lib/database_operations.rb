@@ -20,12 +20,6 @@ class DatabaseOperations
 
     Tempfile.open('initdb') do |f|
       f.puts "set client_min_messages=error;"
-      f.puts "drop schema if exists public cascade;"
-      f.puts "create schema public;"
-      f.puts "drop schema if exists tiger cascade;"
-
-      f.puts "drop language if exists plpgsql cascade;"
-      f.puts "create language plpgsql;"
       f.flush
       pg(cfg, "psql -f #{f.path}")
     end
@@ -39,9 +33,7 @@ class DatabaseOperations
 
     File.open(Rails.root.join(file), "w") { |f|
       f.puts "begin;"
-      f.write pg(cfg, %{pg_dump    -n tiger}).gsub('CREATE FUNCTION', 'CREATE OR REPLACE FUNCTION').lines.reject { |l| l =~ /soundex/ } * ""
-      f.write pg(cfg, %{pg_dump -s -n public}).gsub('CREATE FUNCTION', 'CREATE OR REPLACE FUNCTION')
-      f.write pg(cfg, %{pg_dump -a -t spatial_ref_sys})
+      f.write pg(cfg, %{pg_dump -s})
       f.write pg(cfg, %{pg_dump -a -t schema_migrations})
       f.puts "commit;"
     }

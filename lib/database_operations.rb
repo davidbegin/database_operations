@@ -1,7 +1,7 @@
 require 'open3'
 require 'tempfile'
 class DatabaseOperations
-  def self.pg(cfg, cmd)
+  def self.pg(cfg, cmd, opts = {})
     ENV['PGPASSWORD'] = cfg["password"]
 
     args = []
@@ -10,7 +10,9 @@ class DatabaseOperations
     args << %{-p "#{cfg["port"]}"}     if cfg["port"]
     args << %{-w}
 
-    %x{#{cmd} #{args.join(' ')} "#{cfg['database']}"}
+    pipe = opts[:pipe] ? " | #{opts[:pipe]}" : ""
+
+    %x{#{cmd} #{args.join(' ')} "#{cfg['database']}"#{pipe}}
   ensure
     ENV.delete('PGPASSWORD')
   end
@@ -33,7 +35,7 @@ class DatabaseOperations
 
     File.open(Rails.root.join(file), "w") { |f|
       f.puts "begin;"
-      f.write pg(cfg, %{pg_dump -s})
+      f.write pg(cfg, %{pg_dump -s}, :pipe => %{perl -ne 'print unless /COPY.*spatial_ref_sys/ .. /\\x5c\\x2e/'})
       f.write pg(cfg, %{pg_dump -a -t schema_migrations})
       f.puts "commit;"
     }

@@ -52,9 +52,20 @@ class DatabaseOperations
 
     Tempfile.open('load_views') do |temp|
 
+      line_count = 0
+      erb_file_result_starts = []
       Dir.glob(Rails.root.join('lib', 'sql_erb', '[0-9]*.sql.erb')).sort_by { |f| ('0.%s' % File.split(f).last.gsub(/\D.*/,'')).to_f }.each do |fpath|
-        temp.puts File.open(fpath){|io| ERB.new(io.read).result }
+        erb_result = File.open(fpath){|io| ERB.new(io.read).result }
+
+        first_line = line_count + 1
+        line_count += erb_result.lines.count
+        erb_file_result_starts << "#{File.split(fpath).last} [#{first_line}..#{line_count}]"
+
+        temp.puts erb_result
       end 
+
+      puts "#{erb_file_result_starts * ', '}"
+
       temp.flush
       output = pg cfg, %{psql --single-transaction -f #{temp.path} }
     end 

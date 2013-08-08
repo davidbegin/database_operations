@@ -66,7 +66,7 @@ namespace :db do
         STDERR.puts "CI environment detected: not dumping schema"
       else 
         abcs = ActiveRecord::Base.configurations
-        DatabaseOperations.dump_database_schema!(abcs['development'], 'db/development_structure.sql')
+        abcs['development'] && DatabaseOperations.dump_database_schema!(abcs['development'], 'db/development_structure.sql')
       end 
     end 
   end 

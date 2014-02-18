@@ -1,57 +1,74 @@
 require 'open3'
 require 'tempfile'
+require File.expand_path('../database_helpers.rb', __FILE__)
+
 class DatabaseOperations
-  def self.pg(cfg, cmd, opts = {})
-    ENV['PGPASSWORD'] = cfg["password"]
-
-    args = []
-    args << %{-h "#{cfg["host"]}"}     if cfg["host"]
-    args << %{-U "#{cfg["username"]}"} if cfg["username"]
-    args << %{-p "#{cfg["port"]}"}     if cfg["port"]
-    args << %{-w}
-
-    pipe = opts[:pipe] ? " | #{opts[:pipe]}" : ""
-
-    %x{#{cmd} #{args.join(' ')} "#{cfg['database']}"#{pipe}}
-  ensure
-    ENV.delete('PGPASSWORD')
+  def initialize(opts={})
+    @config = opts.delete(:config) || db_config[opts.delete(:stage) || Rails.env]
+    @db_functions = DatabaseHelpers.new(@config)
   end
 
-  def self.load_database_schema!(cfg, file)
-    pg(cfg, 'createdb') unless pg(cfg, "psql -l") =~ /^ #{cfg['database']}\s*\|/m
+  def config
+    @config
+  end
+
+  def db_config
+    YAML.load_file('config/database.yml')
+  end
+
+  def purge_database
+    @db_functions.execute_sql([
+      "DROP DATABASE IF EXISTS \"#{@config['database']}\"",
+      "CREATE DATABASE \"#{@config['database']}\""
+    ])
+  end
+
+  def load_database_schema!(file)
+    @db_functions.pg('createdb') unless @db_functions.pg("psql -l") =~ /^ #{@config['database']}\s*\|/m
 
     Tempfile.open('initdb') do |f|
       f.puts "set client_min_messages=error;"
       f.flush
-      pg(cfg, "psql -f #{f.path}")
+      @db_functions.pg("psql -f #{f.path}")
     end
 
-    pg cfg, %{psql -f "#{file}"}
+    @db_functions.pg %{psql -f "#{file}"}
   end
 
-  def self.dump_database_schema!(cfg, file)
-    search_path = cfg["schema_search_path"]
+  def dump_database_schema!(file)
+    search_path = @config["schema_search_path"]
     search_path = search_path.split(',').map{|x| "--schema=#{x}"}.join(' ') if search_path
 
     File.open(Rails.root.join(file), "w") { |f|
       f.puts "begin;"
       # Dump database but exclude PostGIS artifacts which are created with CREATE EXTENSION:
-      f.write pg(cfg, %{pg_dump -s -T geometry_columns}, :pipe => %{perl -ne 'print unless /COPY.*spatial_ref_sys/ .. /\\x5c\\x2e/'})
-      f.write pg(cfg, %{pg_dump -a -t schema_migrations})
+      f.write @db_functions.pg(%{pg_dump -s -T geometry_columns}, :pipe => %{perl -ne 'print unless /COPY.*spatial_ref_sys/ .. /\\x5c\\x2e/'})
+      f.write @db_functions.pg( %{pg_dump -a -t schema_migrations -t schema_info})
       f.puts "commit;"
     }
   end
 
-  def self.load_views_and_triggers!(env=Rails.env)
-    cfg = ActiveRecord::Base.configurations[env]
-    unless pg(cfg, "createlang -l") =~ /plpgsql/
-      pg(cfg, "createlang plpgsql")
+  def clone_reference_database!
+    db_ref = @config['reference_db']
+    db_target = @config['database']
+    p "Cloning #{db_ref} at #{@config['host']}:#{@config['port']} to #{db_target}"
+    p 'Killing background actirvity'
+    @db_functions.execute_sql([
+      %Q[SELECT pg_terminate_backend(pg_stat_activity.procpid)
+                       FROM pg_stat_activity
+                       WHERE pg_stat_activity.datname = '#{db_target}';],
+      %Q[DROP DATABASE IF EXISTS "#{db_target}"],
+      %Q[CREATE DATABASE "#{db_target}" TEMPLATE "#{db_ref}"]])
+  end
+
+  def load_views_and_triggers!
+    unless @db_functions.pg("createlang -l") =~ /plpgsql/
+      @db_functions.pg("createlang plpgsql")
     end
 
-    output = nil 
+    output = nil
 
     Tempfile.open('load_views') do |temp|
-
       line_count = 0
       erb_file_result_starts = []
       Dir.glob(Rails.root.join('lib', 'sql_erb', '[0-9]*.sql.erb')).sort_by { |f| ('0.%s' % File.split(f).last.gsub(/\D.*/,'')).to_f }.each do |fpath|
@@ -62,13 +79,13 @@ class DatabaseOperations
         erb_file_result_starts << "#{File.split(fpath).last} [#{first_line}..#{line_count}]"
 
         temp.puts erb_result
-      end 
+      end
 
       puts "#{erb_file_result_starts * ', '}"
 
       temp.flush
-      output = pg cfg, %{psql --single-transaction -f #{temp.path} }
-    end 
+      output = @db_functions.pg %{psql --single-transaction -f #{temp.path} }
+    end
     output
-  end 
+  end
 end

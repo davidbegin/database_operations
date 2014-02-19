@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "database_operations"
-  s.version = "0.0.10"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Renewable Funding, LLC"]
-  s.date = "2013-08-08"
+  s.date = "2014-02-19"
   s.description = "see Summary"
   s.email = "devteam@renewfund.com"
   s.extra_rdoc_files = [
@@ -24,13 +24,16 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "database_operations.gemspec",
+    "lib/database_helpers.rb",
     "lib/database_operations.rb",
+    "lib/projectdx/ci_db_tasks.rb",
+    "lib/projectdx/db_structure_tasks.rb",
     "lib/projectdx/tasks.rb"
   ]
   s.homepage = "http://github.com/projectdx/database_operations"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "2.0.3"
+  s.rubygems_version = "2.0.14"
   s.summary = "Operate the database"
 
   if s.respond_to? :specification_version then
@@ -38,26 +41,20 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<rake>, [">= 0"])
-      s.add_development_dependency(%q<minitest>, [">= 0"])
       s.add_development_dependency(%q<yard>, [">= 0"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
-      s.add_development_dependency(%q<rcov>, [">= 0"])
     else
       s.add_dependency(%q<rake>, [">= 0"])
-      s.add_dependency(%q<minitest>, [">= 0"])
       s.add_dependency(%q<yard>, [">= 0"])
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
-      s.add_dependency(%q<rcov>, [">= 0"])
     end
   else
     s.add_dependency(%q<rake>, [">= 0"])
-    s.add_dependency(%q<minitest>, [">= 0"])
     s.add_dependency(%q<yard>, [">= 0"])
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
-    s.add_dependency(%q<rcov>, [">= 0"])
   end
 end
 

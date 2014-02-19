@@ -12,7 +12,7 @@ class DatabaseHelpers
       :password => @config['password'],
       :dbname => 'postgres',
     )
-    commands.each { |command| pg_conn.exec command }
+    commands.each { |command| puts "Executing #{command}"; pg_conn.exec command }
     pg_conn.close
   end
 

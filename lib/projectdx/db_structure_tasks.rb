@@ -23,4 +23,9 @@ namespace :db do
   task :clone_reference_database => [:environment] do
     DatabaseOperations.new.clone_reference_database!
   end
+
+  desc "Delete and Recreate database"
+  task :purge_database do
+    DatabaseOperations.new.purge_database
+  end
 end

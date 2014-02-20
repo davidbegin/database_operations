@@ -16,6 +16,11 @@ namespace :db do
   end
 
   namespace :test do
+    desc "Drop and recreate empty test db"
+    task :purge => [:environment] do
+      db_ops.purge_database
+    end
+
     desc "Recreate the test databases from the development structure"
     task :clone_structure => [ "db:structure:dump", "db:test:purge"] do
       if File.exists?('db/ci_structure.sql')

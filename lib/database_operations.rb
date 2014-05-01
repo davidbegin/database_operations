@@ -5,8 +5,19 @@ require File.expand_path('../database_helpers.rb', __FILE__)
 
 class DatabaseOperations
   def initialize(opts={})
-    @config = opts.delete(:config) || db_config[opts.delete(:stage) || Rails.env]
+    @config = opts.delete(:config) ||
+      db_config[opts.delete(:stage) ||
+      framework_environment]
     @db_functions = DatabaseHelpers.new(@config)
+  end
+
+  def framework_environment
+    case
+      when defined?(Rails) then Rails.env
+      when defined?(Rory) then ENV['RORY_STAGE']
+      when defined?(Padrino) then Padrino.environment
+      when defined?(Sinatra::Application) then Sinatra::Application.environment
+    end
   end
 
   def config

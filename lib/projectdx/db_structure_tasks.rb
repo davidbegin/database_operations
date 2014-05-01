@@ -20,12 +20,12 @@ namespace :db do
   end
 
   desc "Clone reference DB"
-  task :clone_reference_database => [:environment] do
-    DatabaseOperations.new.clone_reference_database!
+  task :clone_reference_database, :stage do |t, args|
+    DatabaseOperations.new({:stage => args[:stage] }).clone_reference_database!
   end
 
   desc "Delete and Recreate database"
-  task :purge_database do
-    DatabaseOperations.new.purge_database
+  task :purge_database, :stage do |t, args|
+    DatabaseOperations.new({:stage => args[:stage]}).purge_database
   end
 end

@@ -1,5 +1,6 @@
 require 'open3'
 require 'tempfile'
+require 'yaml'
 require File.expand_path('../database_helpers.rb', __FILE__)
 
 class DatabaseOperations

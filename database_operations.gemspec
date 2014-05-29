@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "database_operations"
-  s.version = "0.1.4"
+  s.version = "0.1.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Renewable Funding, LLC"]
-  s.date = "2014-02-20"
+  s.date = "2014-05-29"
   s.description = "see Summary"
   s.email = "devteam@renewfund.com"
   s.extra_rdoc_files = [
@@ -33,11 +33,11 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/projectdx/database_operations"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "2.0.14"
+  s.rubygems_version = "1.8.23"
   s.summary = "Operate the database"
 
   if s.respond_to? :specification_version then
-    s.specification_version = 4
+    s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<rake>, [">= 0"])

@@ -68,7 +68,7 @@ class DatabaseOperations
     @db_functions.execute_sql([
       %Q[SELECT pg_terminate_backend(pg_stat_activity.procpid)
                        FROM pg_stat_activity
-                       WHERE pg_stat_activity.datname in('#{db_target}', '#{db_ref});],
+                       WHERE pg_stat_activity.datname in('#{db_target}', '#{db_ref}');],
       %Q[DROP DATABASE IF EXISTS "#{db_target}"],
       %Q[CREATE DATABASE "#{db_target}" TEMPLATE "#{db_ref}"]])
   end

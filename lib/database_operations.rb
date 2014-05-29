@@ -64,11 +64,11 @@ class DatabaseOperations
     db_ref = @config['reference_db']
     db_target = @config['database']
     p "Cloning #{db_ref} at #{@config['host']}:#{@config['port']} to #{db_target}"
-    p 'Killing background actirvity'
+    p 'Killing background activity'
     @db_functions.execute_sql([
       %Q[SELECT pg_terminate_backend(pg_stat_activity.procpid)
                        FROM pg_stat_activity
-                       WHERE pg_stat_activity.datname = '#{db_target}';],
+                       WHERE pg_stat_activity.datname in('#{db_target}', '#{db_ref});],
       %Q[DROP DATABASE IF EXISTS "#{db_target}"],
       %Q[CREATE DATABASE "#{db_target}" TEMPLATE "#{db_ref}"]])
   end

@@ -4,13 +4,19 @@ class DatabaseHelpers
     @config = config
   end
 
-  def execute_sql(commands)
-    pg_conn = PG::Connection.open(
+  def connection_params
+    {
       :host => @config['host'],
       :port => @config['port'],
       :user => @config['username'],
       :password => @config['password'],
       :dbname => 'postgres',
+    }.reject{|k,v| v.nil?}
+  end
+
+  def execute_sql(commands)
+    pg_conn = PG::Connection.open(
+      connection_params
     )
     commands.each { |command| puts "Executing #{command}"; pg_conn.exec command }
     pg_conn.close

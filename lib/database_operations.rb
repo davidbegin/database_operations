@@ -11,6 +11,15 @@ class DatabaseOperations
     @db_functions = DatabaseHelpers.new(@config)
   end
 
+  def framework
+    case
+      when defined?(Rails) then Rails
+      when defined?(Rory) then Rory
+      when defined?(Padrino) then Padrino
+      when defined?(Sinatra) then Sinatra
+    end
+  end
+
   def framework_environment
     case
       when defined?(Rails) then Rails.env
@@ -51,7 +60,7 @@ class DatabaseOperations
     search_path = @config["schema_search_path"]
     search_path = search_path.split(',').map{|x| "--schema=#{x}"}.join(' ') if search_path
 
-    File.open(Rails.root.join(file), "w") { |f|
+    File.open(framework.root.join(file), "w") { |f|
       f.puts "begin;"
       # Dump database but exclude PostGIS artifacts which are created with CREATE EXTENSION:
       f.write @db_functions.pg(%{pg_dump -s -T geometry_columns}, :pipe => %{perl -ne 'print unless /COPY.*spatial_ref_sys/ .. /\\x5c\\x2e/'})
@@ -83,7 +92,7 @@ class DatabaseOperations
     Tempfile.open('load_views') do |temp|
       line_count = 0
       erb_file_result_starts = []
-      Dir.glob(Rails.root.join('lib', 'sql_erb', '[0-9]*.sql.erb')).sort_by { |f| ('0.%s' % File.split(f).last.gsub(/\D.*/,'')).to_f }.each do |fpath|
+      Dir.glob(framework.root.join('lib', 'sql_erb', '[0-9]*.sql.erb')).sort_by { |f| ('0.%s' % File.split(f).last.gsub(/\D.*/,'')).to_f }.each do |fpath|
         erb_result = File.open(fpath){|io| ERB.new(io.read).result }
 
         first_line = line_count + 1

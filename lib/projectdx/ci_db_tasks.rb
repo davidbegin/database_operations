@@ -4,7 +4,8 @@ namespace :ci do
   desc 'Create database.yml'
   task :configure_database do
     config = File.read('config/database.ci.yml')
-    config.gsub!(/{{hostname}}/m, `hostname`.strip)
+    host_identifier = `hostname`.strip.gsub('.','_')
+    config.gsub!(/{{hostname}}/m, host_identifier)
     File.write('config/database.yml', config)
   end
 end

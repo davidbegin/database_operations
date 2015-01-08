@@ -3,10 +3,12 @@ require File.dirname(__FILE__) + '/../database_operations'
 namespace :ci do
   desc 'Create database.yml'
   task :configure_database do
-    config = File.read('config/database.ci.yml')
-    host_identifier = `hostname`.strip.gsub('.','_')
-    config.gsub!(/{{hostname}}/m, host_identifier)
-    File.write('config/database.yml', config)
+    puts "~~~~~Configuring Database~~~~~~"
+    p config = File.read('config/database.ci.yml')
+    p host_identifier = `hostname`.strip.gsub('.','_')
+    p config.gsub!(/{{hostname}}/m, host_identifier)
+    p File.write('config/database.yml', config)
+    puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   end
 end
 
@@ -23,7 +25,8 @@ namespace :db do
     end
 
     desc "Recreate the test databases from the development structure"
-    task :clone_structure => [ "db:structure:dump", "db:test:purge"] do
+    task :clone_structure => ["db:test:purge"] do
+    # task :clone_structure => [ "db:structure:dump", "db:test:purge"] do
       if File.exists?('db/ci_structure.sql')
         STDERR.puts "CI environment detected"
         db_ops.load_database_schema!('db/ci_structure.sql')
